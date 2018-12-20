@@ -1,0 +1,148 @@
+
+<html dir="ltr">
+<head lang="zh-CN">
+    <meta charset="UTF-8"></meta>
+    <title>反向传播演示</title>
+    <link href="css/roboto.css" rel="stylesheet" type="text/css"></link>
+    <link rel="stylesheet" href="css/backprop.css"></link>
+    <script src="js/d3.v3.min.js" charset="utf-8"></script>
+    <script src="js/scroller.js" charset="utf-8"></script>
+    <script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: {extensions: ["color.js"]},
+        displayAlign: "left"
+      });
+    </script>
+</head>
+<body dir="ltr">
+<div id="container">
+  <div id="sections">
+    <div style="display:none">
+      $$
+      \definecolor{input}{RGB}{66, 133, 244}
+      \definecolor{output}{RGB}{219, 68, 55}
+      \definecolor{dinput}{RGB}{244, 180, 0}
+      \definecolor{doutput}{RGB}{15, 157, 88}
+      \definecolor{dweight}{RGB}{102, 0, 255}
+      $$
+    </div>
+    <section>
+      <h2>反向传播算法</h2>
+        反向传播算法对于快速训练大型神经网络来说至关重要。本文将介绍该算法的工作原理。<br><br>
+        请向下滚动…
+    </section>
+    <section>
+      <h2>简单的神经网络</h2>
+        在右边，您会看到一个神经网络，其中包含一个输入节点、一个输出节点，以及两个隐藏层（分别有两个节点）。
+        <br><br>
+        相邻的层中的节点通过权重 \(w_{ij}\) 相关联，这些权重是网络参数。
+    </section>
+    <section>
+      <h2>激活函数</h2>
+        每个节点都有一个总输入 \(\color{input}x\)、一个激活函数 \(f(\color{input}x\color{black})\) 以及一个输出 \(\color{output}y\color{black}=f(\color{input}x\color{black})\)。
+        \(f(\color{input}x\color{black})\) 必须是非线性函数，否则神经网络就只能学习线性模型。
+        <br><br>
+        常用的激活函数是 <a href="https://wikipedia.org/wiki/Sigmoid_function">S 型函数</a>：\(f(\color{input}x\color{black}) = \frac{1}{1+e^{-\color{input}x}}\)。
+    </section>
+    <section>
+      <h2>误差函数</h2>
+      目标是根据数据自动学习网络的权重，以便让所有输入 \(\color{input}x_{input}\) 的预测输出 \(\color{output}y_{output}\) 接近目标 \(\color{output}y_{target}\)。<br> <br>
+
+      为了衡量与该目标的差距，我们使用了一个误差函数 \(E\)。
+      常用的误差函数是 \(E(\color{output}y_{output}\color{black},\color{output}y_{target}\color{black}) = \frac{1}{2}(\color{output}y_{output}\color{black} - \color{output}y_{target}\color{black})^2 \)。
+    </section>
+    <section>
+      <h2>正向传播</h2>
+        首先，我们取一个输入样本 \((\color{input}x_{input}\color{black},\color{output}y_{target}\color{black})\)，并更新网络的输入层。<br><br>
+        为了保持一致性，我们将输入视为与其他任何节点相同，但不具有激活函数，以便让其输出与输入相等，即 \( \color{output}y_1 \color{black} = \color{input} x_{input} \)。
+    </section>
+    <section>
+      <h2>正向传播</h2>
+        现在，我们更新第一个隐藏层。我们取上一层节点的输出 \(\color{output}y\)，并使用权重来计算下一层节点的输入 \(\color{input}x\)。
+        <div class="formula Input"><span>$$ \color{input} x_j \color{black} = $$</span><span>$$ \sum_{i\in in(j)} w_{ij}\color{output} y_i\color{black} +b_j$$</span></div>
+    </section>
+    <section>
+      <h2>正向传播</h2>
+        然后，我们更新第一个隐藏层中节点的输出。
+        为此，我们使用激活函数 \( f(x) \)。
+        <div class="formula Output">$$ \color{output} y \color{black} = f(\color{input} x \color{black})$$</div>
+    </section>
+    <section data-num-sec="3">
+      <h2>正向传播</h2>
+        使用这两个公式，我们可以传播到网络的其余内容，并获得网络的最终输出。
+        <div class="formula Output">$$ \color{output} y \color{black} = f(\color{input} x \color{black})$$</div>
+        <div class="formula Input"><span>$$ \color{input} x_j \color{black} = $$</span><span>$$ \sum_{i\in in(j)} w_{ij}\color{output} y_i \color{black} + b_j$$</span></div>
+    </section>
+    <section>
+      <h2>误差导数</h2>
+        反向传播算法会对特定样本的预测输出和理想输出进行比较，然后确定网络的每个权重的更新幅度。
+        为此，我们需要计算误差相对于每个权重 \(\color{dweight}\frac{dE}{dw_{ij}}\) 的变化情况。<br>
+        获得误差导数后，我们可以使用一种简单的更新法则来更新权重：
+        <div class="formula">$$w_{ij} = w_{ij} - \alpha \color{dweight}\frac{dE}{dw_{ij}}$$</div>
+        其中，\(\alpha\) 是一个正常量，称为“学习速率”，我们需要根据经验对该常量进行微调。<br> <br>
+        <div style="font-size:13px">
+        [注意] 该更新法则非常简单：如果在权重提高后误差降低了 (\(\color{dweight}\frac{dE}{dw_{ij}}\color{black} &lt; 0\))，则提高权重；否则，如果在权重提高后误差也提高了 (\(\color{dweight}\frac{dE}{dw_{ij}} \color{black} &gt; 0\))，则降低权重。
+        </div>
+    </section>
+    <section>
+      <h2>其他导数</h2>
+        为了帮助计算 \(\color{dweight}\frac{dE}{dw_{ij}}\)，我们还为每个节点分别存储了另外两个导数，即误差随以下两项的变化情况：
+        <ul>
+          <li>节点 \(\color{dinput}\frac{dE}{dx}\) 的总输入，以及</li>
+          <li>节点 \(\color{doutput}\frac{dE}{dy}\) 的输出。</li>
+        </ul>
+    </section>
+    <section>
+      <h2>反向传播</h2>
+        我们开始反向传播误差导数。
+        由于我们拥有此特定输入样本的预测输出，因此我们可以计算误差随该输出的变化情况。
+        根据我们的误差函数 \(E = \frac{1}{2}(\color{output}y_{output}\color{black} - \color{output}y_{target}\color{black})^2\)，我们可以得出：
+        <div class="formula DerOutput">$$ \color{doutput} \frac{\partial E}{\partial y_{output}} \color{black} = \color{output} y_{output} \color{black} - \color{output} y_{target}$$</div>
+    </section>
+    <section>
+      <h2>反向传播</h2>
+        现在我们获得了 \(\color{doutput} \frac{dE}{dy}\)，接下来便可以根据链式法则得出 \(\color{dinput}\frac{dE}{dx}\)。
+        <div class="formula DerInput">$$\color{dinput} \frac{\partial E}{\partial x} \color{black} = \frac{dy}{dx}\color{doutput}\frac{\partial E}{\partial y} \color{black} = \frac{d}{dx}f(\color{input}x\color{black})\color{doutput}\frac{\partial E}{\partial y}$$</div>
+        其中，当 \(f(\color{input}x\color{black})\) 是 S 型激活函数时，\(\frac{d}{dx}f(\color{input}x\color{black}) = f(\color{input}x\color{black})(1 - f(\color{input}x\color{black}))\)。
+    </section>
+    <section>
+      <h2>反向传播</h2>
+      一旦得出相对于某节点的总输入的误差导数，我们便可以得出相对于进入该节点的权重的误差导数。
+      <div class="formula DerWeight">$$\color{dweight} \frac{\partial E}{\partial w_{ij}} \color{black} = \frac{\partial x_j}{\partial w_{ij}} \color{dinput}\frac{\partial E}{\partial x_j} \color{black} = \color{output}y_i \color{dinput} \frac{\partial E}{\partial x_j}$$</div>
+    </section>
+    <section>
+      <h2>反向传播</h2>
+        根据链式法则，我们还可以根据上一层得出 \(\frac{dE}{dy}\)。此时，我们形成了一个完整的循环。
+        <div class="formula DerOutput">$$ \color{doutput} \frac{\partial E}{\partial y_i} \color{black} = \sum_{j\in out(i)} \frac{\partial x_j}{\partial y_i} \color{dinput} \frac{\partial E}{\partial x_j} \color{black} = \sum_{j\in out(i)} w_{ij} \color{dinput} \frac{\partial E}{\partial x_j}$$</div>
+    </section>
+    <section data-num-sec="4">
+      <h2>反向传播</h2>
+      接下来，只需重复前面的 3 个公式，直到计算出所有误差导数即可。
+    </section>
+    <section>
+      <h2>结束。</h2>
+    </section>
+  </div>
+  <div id="vis">
+    <svg id="mainsvg" width="300" height="700">
+    <defs>
+      <marker id="markerCircle" markerwidth="8" markerheight="8" refx="5" refy="5">
+        <circle cx="3" cy="3" r="3"></circle>
+      </marker>
+      <marker id="markerArrow" markerwidth="13" markerheight="13" refx="2" refy="6" orient="auto">
+      <path d="M2,2 L2,11 L10,6 L2,2"></path>
+      </marker>
+    </defs>
+    </svg>
+    <div id="loader">
+      <div class="atebits-loader"></div>
+      <div style="margin-left:20px;float:right">正在计算…</div>
+    </div>
+  </div>
+  <div id="extra-space"></div>
+</div>
+<script src="js/backprop.js"></script>
+<script src="js/draw.js"></script>
+</body>
+</html>
